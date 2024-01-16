@@ -21,14 +21,14 @@ class AuthController extends Controller
         Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|email',
-            'password' => 'required|confirmed'
+            'password' => 'required|confirmed',
         ])->validate();
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'level' => 'Admin'
+            'level' => 'Admin',
         ]);
         return redirect()->route('login');
     }
@@ -42,17 +42,25 @@ class AuthController extends Controller
     {
         Validator::make($request->all(), [
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ])->validate();
-
         if (!Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed')
+                'email' => trans('auth.failed'),
             ]);
         }
-
         $request->session()->regenerate();
         return redirect()->route('dashboard');
     }
 
+    public function logout(Request $request)
+    {
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        return redirect('/');
+    }
+    public function profile()
+    {
+        return view('profile');
+    }
 }
